@@ -3,7 +3,39 @@
 #include <vector>
 #include <stdio.h>
 #include <memory>
+#include <pthread.h>
 #include "diag.cpp"
+
+
+
+typedef struct threadStruct {
+   std::vector<std::vector<int>>*  A;
+   std::vector<std::vector<int>>*  B;
+   std::vector<std::vector<int>>*  C;
+   int id;
+   int numberThreads;
+
+} threadStruct;
+
+
+void *transposeMatrix(void *threadStructInput){
+
+
+    auto *ts = (threadStruct*)threadStructInput;
+    auto A=ts->A;
+    auto C=ts->C;
+
+
+    for (int i = ts->id; i < (*A).size(); i += ts->numberThreads){
+        for (int j = 0; j < (*A).size(); j++){
+            (*C)[j][i]=(*A)[i][j];
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
+
 
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
@@ -76,6 +108,40 @@ int main()
             printf("Error: matrix needs to be square");
         }
     }
+
+
+    // Rashaad basic parallel transpose below
+    std::vector<threadStruct> structVec;
+    threadStruct thread_struct;
+    auto A=generateRandom2D(8);
+    auto B=generateRandom2D(8);
+    auto C=generateRandom2D(8);
+
+    for (int i=0;i<4;i++){
+
+        structVec.push_back(thread_struct);
+        structVec[i].A=&A;
+        structVec[i].B=&B;
+        structVec[i].C=&C;
+
+    }
+
+
+
+     pthread_t thread[4];
+  // int tid[4];
+    for (int i = 0; i < 4; i++) {
+            structVec[i].id = i;
+            structVec[i].numberThreads=4;
+            pthread_create(&thread[i], NULL, transposeMatrix, &structVec[i]);
+    }
+   
+    for (int i = 0; i < 4; i++){
+        pthread_join(thread[i], NULL);
+    }
+
+    print2D(A);
+    print2D(C);
 
     return 0;
 }
