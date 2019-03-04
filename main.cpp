@@ -51,7 +51,9 @@ int main()
 {
     srand(time(NULL));
 
-    auto N = {128, 1024, 2048, 4096};
+    // uncomment when finished testing
+    // auto N = {128, 1024, 2048, 4096};
+    auto N = {10};
 
     for (auto n : N)
     {
@@ -66,7 +68,8 @@ int main()
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
-            diagTranspose(matrixPtr);
+            printf("Diagonal Transpose \n");
+            print2D(diagTranspose(matrixPtr));
         }
         else
         {
