@@ -112,14 +112,14 @@ int main()
 
     // Rashaad basic parallel transpose below
     std::vector<threadStruct> structVec;
-    threadStruct thread_struct;
+    // threadStruct thread_struct;
     auto A=generateRandom2D(8);
     auto B=generateRandom2D(8);
     auto C=generateRandom2D(8);
 
     for (int i=0;i<4;i++){
 
-        structVec.push_back(thread_struct);
+        structVec.push_back(threadStruct());
         structVec[i].A=&A;
         structVec[i].B=&B;
         structVec[i].C=&C;
