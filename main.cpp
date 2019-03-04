@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <memory>
 #include "diag.cpp"
+#include "block.cpp"
+
 
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
@@ -53,7 +55,7 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {10};
+    auto N = {4};
 
     for (auto n : N)
     {
@@ -68,8 +70,11 @@ int main()
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
-            printf("Diagonal Transpose \n");
-            print2D(diagTranspose(matrixPtr));
+            // printf("Diagonal Transpose \n");
+            // print2D(diagTranspose(matrixPtr));
+             printf("Block Transpose \n");
+             print2D(blockTranspose(matrixPtr));
+
         }
         else
         {
