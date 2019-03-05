@@ -55,11 +55,11 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {4};
+    auto N = {8};
 
     for (auto n : N)
     {
-        const auto matrix = generateRandom2D(n);
+         auto matrix = generateRandom2D(n);
         auto matrixPtr = std::make_shared<std::vector<std::vector<int>>>(matrix);
         printf("Initial Matrix \n");
         print2D(matrix);
@@ -73,8 +73,11 @@ int main()
             // printf("Diagonal Transpose \n");
             // print2D(diagTranspose(matrixPtr));
              printf("Block Transpose \n");
-             print2D(blockTranspose(matrixPtr));
-
+             int startX=0;
+             int startY=0;
+            blockTranspose(matrixPtr,n, startX, startY);
+            matrix=*matrixPtr;
+            print2D(matrix);
         }
         else
         {
