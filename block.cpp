@@ -4,12 +4,7 @@
 using namespace std;
 
 
-// void swap(int &x, int &y)
-// {
-// 	x=x+y;
-// 	y=x-y;
-// 	x=x-y;
-// }
+
 void swap(auto matrixPtr, int xSwap1,int ySwap1, int xSwap2, int ySwap2)
 {
 	(*matrixPtr)[xSwap1][ySwap1]=(*matrixPtr)[xSwap1][ySwap1]+(*matrixPtr)[xSwap2][ySwap2];
@@ -19,10 +14,9 @@ void swap(auto matrixPtr, int xSwap1,int ySwap1, int xSwap2, int ySwap2)
 }
 
 
-void blockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int subBlockSize, int startX,int startY)
+void elementBlockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int subBlockSize, int startX,int startY)
 {
 	 
-	// cout<<"x: "<< startX<<" y: "<<startY<<endl;	 
 	 if(subBlockSize==2)
 	 {
 
@@ -31,34 +25,36 @@ void blockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int
 	 else
 	 {
 	 	auto newSublockSize=subBlockSize/2;
-	 	blockTranspose(matrixPtr, newSublockSize, startX, startY);
-	 	blockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY);
-	 	blockTranspose(matrixPtr, newSublockSize, startX, startY+newSublockSize);
-	 	blockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY+newSublockSize);
+	 	elementBlockTranspose(matrixPtr, newSublockSize, startX, startY);
+	 	elementBlockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY);
+	 	elementBlockTranspose(matrixPtr, newSublockSize, startX, startY+newSublockSize);
+	 	elementBlockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY+newSublockSize);
 
 	 }
 	 
 }
 
+void swapWholeBlock (std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int i, int j)
+{
+	swap(matrixPtr,i,j,j,i);
+	swap(matrixPtr,i+1,j,j+1,i);
+	swap(matrixPtr,i,j+1,j,i+1);
+	swap(matrixPtr,i+1,j+1,j+1,i+1);
+}
 
+void allBlocksTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr, int matrixSize)
+{
+	for(int i=0;i<matrixSize;i=i+2)
+	{
+		for(int j=i;j<matrixSize;j=j+2)
+		{
+			if(i!=j)
+			{
+				swapWholeBlock(matrixPtr,i,j);
+			}
+		}
+	}
+		
+}
 
-// std::vector<std::vector<int>> blockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
-// {
-//     // transpose by only accessing matrix elements with dereference operator to avoid copy
-//     // initially just dereferencing to check if it works
-//     auto matrix = *matrixPtr;
-//     auto n = matrix.size();
-//     auto subBlockSize=n/2;
-//     // cout<<"N equals"<<n<<endl;
-//    if(n==4)
-//    {
-//    		 getSubBlocksTransposed(matrix);
-//    }
-//    else
-//    {
-
-//    }
-
-//     return matrix;
-// }
 

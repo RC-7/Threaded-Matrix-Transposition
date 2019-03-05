@@ -55,7 +55,7 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {8};
+    auto N = {16};
 
     for (auto n : N)
     {
@@ -75,7 +75,8 @@ int main()
              printf("Block Transpose \n");
              int startX=0;
              int startY=0;
-            blockTranspose(matrixPtr,n, startX, startY);
+            elementBlockTranspose(matrixPtr,n, startX, startY);
+            allBlocksTranspose(matrixPtr,n);
             matrix=*matrixPtr;
             print2D(matrix);
         }
