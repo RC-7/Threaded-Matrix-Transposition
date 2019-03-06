@@ -1,24 +1,26 @@
 #include <vector>
-#include <memory>
+#include <stdio.h>
 
-// change to this when pointer works
-// void diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
-std::vector<std::vector<int>> diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
+typedef struct threadStruct {
+   std::vector<std::vector<int>>*  matrixPtr;
+   int id;
+   int numberThreads;
+} threadStruct;
+
+void* diagTranspose(void* threadStructInput)
 {
-    // transpose by only accessing matrix elements with dereference operator to avoid copy
-    // initially just dereferencing to check if it works
-    auto matrix = *matrixPtr;
-    auto n = matrix.size();
+    threadStruct* ts = (threadStruct*)threadStructInput;
+    auto n = (*(ts->matrixPtr)).size();
 
-    for (auto i = 0; i < n; ++i)
+    for (auto i = ts->id; i < n; i += ts->numberThreads)
     {
         for (auto j = i+1; j < n; ++j)
         {
-            matrix[i][j] = matrix[i][j] + matrix[j][i];
-            matrix[j][i] = matrix[i][j] - matrix[j][i];
-            matrix[i][j] = matrix[i][j] - matrix[j][i];
+            (*(ts->matrixPtr))[i][j] = (*(ts->matrixPtr))[i][j] + (*(ts->matrixPtr))[j][i];
+            (*(ts->matrixPtr))[j][i] = (*(ts->matrixPtr))[i][j] - (*(ts->matrixPtr))[j][i];
+            (*(ts->matrixPtr))[i][j] = (*(ts->matrixPtr))[i][j] - (*(ts->matrixPtr))[j][i];
         }
     }
 
-    return matrix;
+    pthread_exit(NULL);
 }

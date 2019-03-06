@@ -5,6 +5,8 @@
 #include <memory>
 #include "diag.cpp"
 
+#define THREAD_NUM 4
+
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
 
@@ -21,10 +23,10 @@ std::vector<std::vector<int>> generateRandom2D(int n)
     return randomMatrix;
 }
 
-void print2D(std::vector<std::vector<int>> A)
+void print2D(std::vector<std::vector<int>> *matrixPtr)
 {
     printf("\n");
-    for (auto &value : A)
+    for (auto &value : (*matrixPtr))
     {
 
         for (auto &entry : value)
@@ -57,19 +59,41 @@ int main()
 
     for (auto n : N)
     {
-        const auto matrix = generateRandom2D(n);
-        auto matrixPtr = std::make_shared<std::vector<std::vector<int>>>(matrix);
+        auto matrix = generateRandom2D(n);
+        auto matrixPtr = &matrix;
         printf("Initial Matrix \n");
-        print2D(matrix);
+        print2D(matrixPtr);
 
         //perform each of the operations and use print2D to print the output
         // I put the check dimension function above so we can just call it before doing anything else
-        // we might have to use pointers to move our matrices around since it asks for in place transposition and passing by value might cause memory issues
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
+            //DIAGONAL
+            pthread_t threads[THREAD_NUM];
+
+            // setup threads
+            std::vector<threadStruct> structVec;
+            for (int i = 0; i < 4; i++)
+            {
+                structVec.push_back(threadStruct());
+                structVec[i].matrixPtr = matrixPtr;
+                structVec[i].numberThreads = THREAD_NUM;
+                structVec[i].id = i;
+            }
+
+            // create threads and do diagonal transpose
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL, diagTranspose, &structVec[i]);
+            }
+
+            // join all threads
+            for (int j = 0; j < THREAD_NUM; ++j)
+                pthread_join(threads[j], NULL);
+
             printf("Diagonal Transpose \n");
-            print2D(diagTranspose(matrixPtr));
+            print2D(matrixPtr);
         }
         else
         {
