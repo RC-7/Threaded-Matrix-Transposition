@@ -75,8 +75,9 @@ int main()
              printf("Block Transpose \n");
              int startX=0;
              int startY=0;
-            elementBlockTranspose(matrixPtr,n, startX, startY);
-            allBlocksTranspose(matrixPtr,n);
+             blockTranspose(matrixPtr,n,n,startX,startY);
+            // elementBlockTranspose(matrixPtr,n, startX, startY);
+            // allBlocksTranspose(matrixPtr,n);
             matrix=*matrixPtr;
             print2D(matrix);
         }

@@ -57,4 +57,9 @@ void allBlocksTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr
 		
 }
 
+void blockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int matrixSize,int subBlockSize, int startX,int startY)
+{
+	 elementBlockTranspose(matrixPtr,subBlockSize, startX, startY);
+	 allBlocksTranspose( matrixPtr,  matrixSize);
+}
 
