@@ -72,16 +72,6 @@ int main()
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
-            // printf("Diagonal Transpose \n");
-            // print2D(diagTranspose(matrixPtr));
-            //  printf("Block Transpose \n");
-            //  int startX=0;
-            //  int startY=0;
-            //  blockTranspose(matrixPtr,n,n,startX,startY);
-            // // elementBlockTranspose(matrixPtr,n, startX, startY);
-            // // allBlocksTranspose(matrixPtr,n);
-            // matrix=*matrixPtr;
-            // print2D(matrix);
 
             //Block
             pthread_t threads[THREAD_NUM];
@@ -99,14 +89,27 @@ int main()
                 structVecBlock[i].startY=0;
             }
 
-            structVecBlock[1].startX=n/2;
-            structVecBlock[1].startY=0;
 
-            structVecBlock[2].startX=0;
-            structVecBlock[2].startY=n/2;
+            for (int i=0;i<2;i++)//thread 0: 0 0; thread 1: 0 n/2
+            {
+                structVecBlock[i].startX=0;
+                structVecBlock[i].startY=i*n/2;
+            }
 
-            structVecBlock[3].startX=n/2;
-            structVecBlock[3].startY=n/2;
+            for (int i=2;i<4;i++)
+            {
+                structVecBlock[i].startX=n/2;
+                structVecBlock[i].startY=(i-2)*n/2;
+            }
+            // //Determine starting blocks
+            // structVecBlock[1].startX=n/2;
+            // structVecBlock[1].startY=0;
+
+            // structVecBlock[2].startX=0;
+            // structVecBlock[2].startY=n/2;
+
+            // structVecBlock[3].startX=n/2;
+            // structVecBlock[3].startY=n/2;
 
 
 
