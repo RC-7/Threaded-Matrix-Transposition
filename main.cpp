@@ -56,7 +56,7 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {8};
+    auto N = {16};
 
     for (auto n : N)
     {
@@ -94,17 +94,30 @@ int main()
                 structVecBlock[i].matrixPtr = matrixPtr;
                 structVecBlock[i].numberThreads = THREAD_NUM;
                 structVecBlock[i].id = i;
-                structVecBlock[i].subBlockSize=n;
+                structVecBlock[i].subBlockSize=n/2;
                 structVecBlock[i].startX=0;
                 structVecBlock[i].startY=0;
             }
 
+            structVecBlock[1].startX=n/2;
+            structVecBlock[1].startY=0;
+
+            structVecBlock[2].startX=0;
+            structVecBlock[2].startY=n/2;
+
+            structVecBlock[3].startX=n/2;
+            structVecBlock[3].startY=n/2;
+
+
+
+
             // create threads and do diagonal transpose
-            // for (int i = 0; i < THREAD_NUM; ++i)
-            // {
-            //     pthread_create(&threads[i], NULL, elementBlockTranspose, &structVecBlock[i]);
-            // }
-            pthread_create(&threads[0], NULL, elementBlockTransposeThread, &structVecBlock[0]);
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL, elementBlockTransposeThread, &structVecBlock[i]);
+            }
+            // pthread_create(&threads[0], NULL, elementBlockTransposeThread, &structVecBlock[0]);
+            // pthread_create(&threads[0], NULL, elementBlockTransposeThread, &structVecBlock[0]);
             // join all threads
             for (int j = 0; j < THREAD_NUM; ++j)
                 pthread_join(threads[j], NULL);
