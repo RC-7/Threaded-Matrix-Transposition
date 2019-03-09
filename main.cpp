@@ -101,32 +101,29 @@ int main()
                 structVecBlock[i].startX=n/2;
                 structVecBlock[i].startY=(i-2)*n/2;
             }
-            // //Determine starting blocks
-            // structVecBlock[1].startX=n/2;
-            // structVecBlock[1].startY=0;
+          
 
-            // structVecBlock[2].startX=0;
-            // structVecBlock[2].startY=n/2;
-
-            // structVecBlock[3].startX=n/2;
-            // structVecBlock[3].startY=n/2;
-
-
-
-
-            // create threads and do diagonal transpose
+            //First Transposition
             for (int i = 0; i < THREAD_NUM; ++i)
             {
                 pthread_create(&threads[i], NULL, elementBlockTransposeThread, &structVecBlock[i]);
             }
-            // pthread_create(&threads[0], NULL, elementBlockTransposeThread, &structVecBlock[0]);
-            // pthread_create(&threads[0], NULL, elementBlockTransposeThread, &structVecBlock[0]);
-            // join all threads
+           
             for (int j = 0; j < THREAD_NUM; ++j)
                 pthread_join(threads[j], NULL);
 
             //matrix=*matrixPtr;
-           allBlocksTranspose(matrixPtr,n);
+           //allBlocksTranspose(matrixPtr,n);
+            
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL,lastTranspose, &structVecBlock[i]);
+            }
+
+            for (int j = 0; j < THREAD_NUM; ++j)
+                pthread_join(threads[j], NULL);
+
+             printf("\nTransposed Matrix \n");
             print2D(matrixPtr);
 
 

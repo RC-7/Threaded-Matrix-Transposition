@@ -63,10 +63,8 @@ void* elementBlockTransposeThread(void* threadStructInput)
 	 	elementBlockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY+newSublockSize);
 
 	 }
-	  pthread_exit(NULL);
-	 
+	  pthread_exit(NULL);	 
 }
-
 
 
 void swapWholeBlock (std::vector<std::vector<int>>* matrixPtr,int i, int j)
@@ -77,24 +75,25 @@ void swapWholeBlock (std::vector<std::vector<int>>* matrixPtr,int i, int j)
 	swap(matrixPtr,i+1,j+1,j+1,i+1);
 }
 
-void allBlocksTranspose(std::vector<std::vector<int>>* matrixPtr, int matrixSize)
+
+void* lastTranspose(void* threadStructInput)
 {
-	for(int i=0;i<matrixSize;i=i+2)
-	{
-		for(int j=i;j<matrixSize;j=j+2)
-		{
-			if(i!=j)
+   threadStructBlock* ts = (threadStructBlock*)threadStructInput;
+    auto n = (*(ts->matrixPtr)).size();
+
+   // for (auto i = ts->id; i < n; i += (ts->numberThreads+1))
+    for(auto i = (ts->id)*2; i<n; i=i+(ts->numberThreads+1)*2)
+    {
+        for (auto j = i; j < n; j=j+2)
+        {
+           if(i!=j)
 			{
-				swapWholeBlock(matrixPtr,i,j);
+				swapWholeBlock((ts->matrixPtr),i,j);
 			}
-		}
-	}
-		
+        }
+    }
+
+    pthread_exit(NULL);
 }
 
-// void blockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int matrixSize,int subBlockSize, int startX,int startY)
-// {
-// 	 elementBlockTranspose(matrixPtr,subBlockSize, startX, startY);
-// 	 allBlocksTranspose( matrixPtr,  matrixSize);
-// }
 
