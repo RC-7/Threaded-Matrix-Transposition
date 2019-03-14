@@ -57,9 +57,7 @@ int main()
 {
     srand(time(NULL));
 
-    // uncomment when finished testing
-    // auto N = {128, 1024, 2048, 4096};
-    auto N = {4096};
+    auto N = {128, 1024, 2048, 4096};
 
     for (auto n : N)
     {
