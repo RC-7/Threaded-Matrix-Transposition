@@ -6,6 +6,9 @@
 #include "diag.cpp"
 #include "block.cpp"
 #include <omp.h>
+#include <pthread.h>
+
+#define THREAD_NUM 4
 
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
@@ -62,7 +65,7 @@ int main()
         auto matrix = generateRandom2D(n);
         auto matrixPtr = &matrix;
         printf("Initial Matrix \n");
-        print2D(matrix);
+        // print2D(matrix);
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
@@ -103,8 +106,53 @@ int main()
             double diagPTime = end-begin;
 
             printf("Block Transpose with PThreads \n");
+
+            pthread_t threads[THREAD_NUM];
+
+            // setup threads
+            std::vector<threadStructBlock> structVecBlock;
+            for (int i = 0; i < 4; i++)
+            {
+                structVecBlock.push_back(threadStructBlock());
+                structVecBlock[i].matrixPtr = matrixPtr;
+                structVecBlock[i].numberThreads = THREAD_NUM;
+                structVecBlock[i].id = i;
+                structVecBlock[i].subBlockSize=n/2;
+                structVecBlock[i].startX=0;
+                structVecBlock[i].startY=0;
+            }
+
+
+            for (int i=0;i<2;i++)//thread 0: 0 0; thread 1: 0 n/2
+            {
+                structVecBlock[i].startX=0;
+                structVecBlock[i].startY=i*n/2;
+            }
+
+            for (int i=2;i<4;i++)
+            {
+                structVecBlock[i].startX=n/2;
+                structVecBlock[i].startY=(i-2)*n/2;
+            }
+          
             begin = omp_get_wtime();
-            // call transpose
+            //First Transposition
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL, elementBlockTransposeThread, &structVecBlock[i]);
+            }
+           
+            for (int j = 0; j < THREAD_NUM; ++j)
+                pthread_join(threads[j], NULL);
+
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL,lastTranspose, &structVecBlock[i]);
+            }
+
+            for (int j = 0; j < THREAD_NUM; ++j)
+                pthread_join(threads[j], NULL);
+            
             end = omp_get_wtime();
             double blockPTime = end-begin;
             
@@ -122,21 +170,15 @@ int main()
             double diagOTime = end-begin;
 
             printf("Block Transpose with OpenMP \n");
+            startX=0;
+            startY=0;
             begin = omp_get_wtime();
-            // call transpose
+            elementBlockTransposeOMP(matrixPtr,n, startX, startY);
+            allBlocksTransposeOMP(matrixPtr,n);
             end = omp_get_wtime();
             double blockOTime = end-begin;
 
-            // auto ompDiagTime = (end - begin);
-            // print2D(*matrixPtr);
-            // printf("Diagonal time: %d \n", ompDiagTime);
-            // printf("Block Transpose \n");
-            // int startX=0;
-            // int startY=0;
-            // elementBlockTranspose(matrixPtr,n, startX, startY);
-            // allBlocksTranspose(matrixPtr,n);
-            // matrix=*matrixPtr;
-            // print2D(matrix);
+
             
             printf("\nNaive with no threading %f s\n", naiveNoTime);
             printf("Diagonal with no threading %f s\n", diagNoTime);
