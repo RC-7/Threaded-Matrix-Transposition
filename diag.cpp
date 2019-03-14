@@ -10,7 +10,7 @@ double omp_get_wtime(void);
 
 // change to this when pointer works
 // void diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> (*matrixPtr)Ptr)
-void diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
+void diagTransposeOMP(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
 {
     // double omp_get_wtime(void);
     // transpose by only accessing (*matrixPtr) elements with dereference operator to avoid copy
@@ -20,15 +20,13 @@ void diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
     begin = omp_get_wtime();
 
      auto begins = clock();
-    #pragma omp for 
+    #pragma omp parallel for 
     for (auto i = 0; i < n; ++i)
-
-
     {
         // if (i==0)
         //      begin = omp_get_wtime();
 
-        // #pragma omp parallel for
+        #pragma omp parallel for 
         for (auto j = i+1; j < n; ++j)
         {
             (*matrixPtr)[i][j] = (*matrixPtr)[i][j] + (*matrixPtr)[j][i];

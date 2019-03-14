@@ -14,7 +14,7 @@ void swap(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr, int xSwap1,i
 }
 
 
-void elementBlockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int subBlockSize, int startX,int startY)
+void elementBlockTransposeOMP(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,int subBlockSize, int startX,int startY)
 {
 	 
 	 if(subBlockSize==2)
@@ -25,10 +25,10 @@ void elementBlockTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrix
 	 else
 	 {
 	 	auto newSublockSize=subBlockSize/2;
-	 	elementBlockTranspose(matrixPtr, newSublockSize, startX, startY);
-	 	elementBlockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY);
-	 	elementBlockTranspose(matrixPtr, newSublockSize, startX, startY+newSublockSize);
-	 	elementBlockTranspose(matrixPtr, newSublockSize, startX+newSublockSize, startY+newSublockSize);
+	 	elementBlockTransposeOMP(matrixPtr, newSublockSize, startX, startY);
+	 	elementBlockTransposeOMP(matrixPtr, newSublockSize, startX+newSublockSize, startY);
+	 	elementBlockTransposeOMP(matrixPtr, newSublockSize, startX, startY+newSublockSize);
+	 	elementBlockTransposeOMP(matrixPtr, newSublockSize, startX+newSublockSize, startY+newSublockSize);
 
 	 }
 	 
@@ -42,10 +42,12 @@ void swapWholeBlock (std::shared_ptr<std::vector<std::vector<int>>> matrixPtr,in
 	swap(matrixPtr,i+1,j+1,j+1,i+1);
 }
 
-void allBlocksTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr, int matrixSize)
+void allBlocksTransposeOMP(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr, int matrixSize)
 {
+	 #pragma omp parallel for 
 	for(int i=0;i<matrixSize;i=i+2)
 	{
+		#pragma omp parallel for 
 		for(int j=i;j<matrixSize;j=j+2)
 		{
 			if(i!=j)
