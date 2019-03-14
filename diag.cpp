@@ -2,7 +2,9 @@
 #include <memory>
 #include <omp.h>
 #include <stdio.h>
+#include <time.h>
 #include <iostream>
+#include <typeinfo>
 double omp_get_wtime(void);
 // omp_set_num_threads(8);
 
@@ -16,7 +18,9 @@ void diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
     auto n = (*matrixPtr).size();
     double begin,end;
     begin = omp_get_wtime();
-    // #pragma omp for 
+
+     auto begins = clock();
+    #pragma omp for 
     for (auto i = 0; i < n; ++i)
 
 
@@ -36,9 +40,14 @@ void diagTranspose(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr)
         //      end = omp_get_wtime();
     }
       end= omp_get_wtime();
+      auto ends = clock();
 
       double times=end-begin;
 
     std::cout<<end-begin<<std::endl;
-    printf("time: %d \n", times);
+    std::cout<<ends-begins<<std::endl;
+    std::cout<<typeid(times).name()<<std::endl;
+
+
+    printf("time: %f s \n", times);
 }

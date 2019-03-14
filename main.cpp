@@ -55,7 +55,7 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {1024};
+    auto N = {20};
 
     for (auto n : N)
     {
