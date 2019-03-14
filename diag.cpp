@@ -23,9 +23,9 @@ void diagTranspose(std::vector<std::vector<int>>* matrixPtr)
     }
 }
 
-void* pthreadDiagTranspose(void* threadStructInput)
+void* pthreadDiagTranspose(void* threadStructReceived)
 {
-    threadStruct* ts = (threadStruct*)threadStructInput;
+    threadStruct* ts = (threadStruct*)threadStructReceived;
     auto n = (*(ts->matrixPtr)).size();
 
     for (auto i = ts->id; i < n; i += ts->numberThreads)

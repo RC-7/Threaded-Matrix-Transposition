@@ -3,10 +3,11 @@
 #include <vector>
 #include <stdio.h>
 #include <memory>
-#include "diag.cpp"
-#include "block.cpp"
 #include <omp.h>
 #include <pthread.h>
+#include "diag.cpp"
+#include "block.cpp"
+#include "naive.cpp"
 
 #define THREAD_NUM 4
 
@@ -69,11 +70,13 @@ int main()
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
+            auto outputMatrix = matrix;
+
             double begin, end, timeDiff;
             printf("Transposition times for matrix of size %d \n", n);
             printf("Naive Transpose without Threading \n");
             begin = omp_get_wtime();
-            // call transpose
+            naiveTranspose(matrixPtr, &outputMatrix);
             end = omp_get_wtime();
             double naiveNoTime = end-begin;
 
@@ -96,7 +99,28 @@ int main()
             printf("Naive Transpose with PThreads \n");
             pthread_t threads[THREAD_NUM];
             begin = omp_get_wtime();
-            // call transpose
+
+            // setup threads
+            std::vector<threadStructInput> threadStructVec;
+            for (int i = 0; i < THREAD_NUM; i++)
+            {
+                threadStructVec.push_back(threadStructInput());
+                threadStructVec[i].matrixPtr = matrixPtr;
+                threadStructVec[i].outputPtr = &outputMatrix;
+                threadStructVec[i].numberThreads = THREAD_NUM;
+                threadStructVec[i].id = i;
+            }
+
+            // create threads and do diagonal transpose
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL, pthreadDiagTranspose, &threadStructVec[i]);
+            }
+
+            // join all threads
+            for (int j = 0; j < THREAD_NUM; ++j)
+                pthread_join(threads[j], NULL);
+
             end = omp_get_wtime();
             double naivePTime = end-begin;
 
@@ -178,7 +202,7 @@ int main()
     
             printf("Naive Transpose with OpenMP \n");
             begin = omp_get_wtime();
-            // call transpose
+            ompNaiveTranspose(matrixPtr, &outputMatrix);
             end = omp_get_wtime();
             double naiveOTime = end-begin;
 
