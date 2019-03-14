@@ -64,10 +64,6 @@ int main()
         printf("Initial Matrix \n");
         print2D(matrix);
 
-        //perform each of the operations and use print2D to print the output
-        // I put the check dimension function above so we can just call it before doing anything else
-        // we might have to use pointers to move our matrices around since it asks for in place transposition and passing by value might cause memory issues
-
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
             double begin, end, timeDiff;
@@ -138,7 +134,7 @@ int main()
             // allBlocksTranspose(matrixPtr,n);
             // matrix=*matrixPtr;
             // print2D(matrix);
-
+            
             printf("\nNaive with no threading %f ms\n", naiveNoTime);
             printf("Diagonal with no threading %f ms\n", diagNoTime);
             printf("Block with no threading %f ms\n", blockNoTime);
