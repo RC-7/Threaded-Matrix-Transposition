@@ -209,7 +209,7 @@ int main()
 
             printf("\nNaive with openMP %f s\n", naiveOTime);
             printf("Diagonal with openMP %f s\n", diagOTime);
-            printf("Block with openMP %f s\n", blockOTime);
+            printf("Block with openMP %f s\n\n\n", blockOTime);
         }
         else
         {
