@@ -55,12 +55,12 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {4};
+    auto N = {4096};
 
     for (auto n : N)
     {
         auto matrix = generateRandom2D(n);
-        auto matrixPtr = std::make_shared<std::vector<std::vector<int>>>(matrix);
+        auto matrixPtr = &matrix;
         printf("Initial Matrix \n");
         print2D(matrix);
 
@@ -82,7 +82,10 @@ int main()
 
             printf("Block Transpose without Threading \n");
             begin = omp_get_wtime();
-            // call transpose
+            int startX=0;
+            int startY=0;
+            elementBlockTranspose(matrixPtr, n, startX, startY);
+            allBlocksTranspose(matrixPtr, n);
             end = omp_get_wtime();
             double blockNoTime = end-begin;
 
@@ -135,17 +138,17 @@ int main()
             // matrix=*matrixPtr;
             // print2D(matrix);
             
-            printf("\nNaive with no threading %f ms\n", naiveNoTime);
-            printf("Diagonal with no threading %f ms\n", diagNoTime);
-            printf("Block with no threading %f ms\n", blockNoTime);
+            printf("\nNaive with no threading %f s\n", naiveNoTime);
+            printf("Diagonal with no threading %f s\n", diagNoTime);
+            printf("Block with no threading %f s\n", blockNoTime);
 
-            printf("\nNaive with pthreads %f ms\n", naivePTime);
-            printf("Diagonal with pthreads %f ms\n", diagPTime);
-            printf("Block with pthreads %f ms\n", blockPTime);
+            printf("\nNaive with pthreads %f s\n", naivePTime);
+            printf("Diagonal with pthreads %f s\n", diagPTime);
+            printf("Block with pthreads %f s\n", blockPTime);
 
-            printf("\nNaive with pthreads %f ms\n", naiveOTime);
-            printf("Diagonal with pthreads %f ms\n", diagOTime);
-            printf("Block with pthreads %f ms\n", blockOTime);
+            printf("\nNaive with pthreads %f s\n", naiveOTime);
+            printf("Diagonal with pthreads %f s\n", diagOTime);
+            printf("Block with pthreads %f s\n", blockOTime);
         }
         else
         {
