@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <memory>
 #include "diag.cpp"
-#include "block.cpp"
-#include <omp.h>
 
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
@@ -55,11 +53,11 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {4};
+    auto N = {10};
 
     for (auto n : N)
     {
-        auto matrix = generateRandom2D(n);
+        const auto matrix = generateRandom2D(n);
         auto matrixPtr = std::make_shared<std::vector<std::vector<int>>>(matrix);
         printf("Initial Matrix \n");
         print2D(matrix);
@@ -71,20 +69,7 @@ int main()
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
             printf("Diagonal Transpose \n");
-
-            // auto begin = clock();
-            diagTranspose(matrixPtr);
-            // auto end = clock();
-            // auto ompDiagTime = (end - begin);
-            // print2D(*matrixPtr);
-            // printf("Diagonal time: %d \n", ompDiagTime);
-            // printf("Block Transpose \n");
-            // int startX=0;
-            // int startY=0;
-            // elementBlockTranspose(matrixPtr,n, startX, startY);
-            // allBlocksTranspose(matrixPtr,n);
-            // matrix=*matrixPtr;
-            // print2D(matrix);
+            print2D(diagTranspose(matrixPtr));
         }
         else
         {
