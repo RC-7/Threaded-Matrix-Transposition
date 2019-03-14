@@ -5,7 +5,7 @@ using namespace std;
 
 
 
-void swap(auto matrixPtr, int xSwap1,int ySwap1, int xSwap2, int ySwap2)
+void swap(std::shared_ptr<std::vector<std::vector<int>>> matrixPtr, int xSwap1,int ySwap1, int xSwap2, int ySwap2)
 {
 	(*matrixPtr)[xSwap1][ySwap1]=(*matrixPtr)[xSwap1][ySwap1]+(*matrixPtr)[xSwap2][ySwap2];
 	(*matrixPtr)[xSwap2][ySwap2]=(*matrixPtr)[xSwap1][ySwap1]-(*matrixPtr)[xSwap2][ySwap2];
