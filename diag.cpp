@@ -7,7 +7,7 @@ typedef struct threadStruct {
    int numberThreads;
 } threadStruct;
 
-void* diagTranspose(void* threadStructInput)
+void* pthreadDiagTranspose(void* threadStructInput)
 {
     threadStruct* ts = (threadStruct*)threadStructInput;
     auto n = (*(ts->matrixPtr)).size();

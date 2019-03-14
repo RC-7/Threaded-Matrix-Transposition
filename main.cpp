@@ -3,44 +3,9 @@
 #include <vector>
 #include <stdio.h>
 #include <memory>
-#include <pthread.h>
 #include "diag.cpp"
 #include "block.cpp"
-#define THREAD_NUM 4
-
-
-#define THREAD_NUM 4
-
-
-
-typedef struct threadStruct {
-   std::vector<std::vector<int>>*  A;
-   std::vector<std::vector<int>>*  B;
-   std::vector<std::vector<int>>*  C;
-   int id;
-   int numberThreads;
-
-} threadStruct;
-
-
-void *transposeMatrix(void *threadStructInput){
-
-
-    auto *ts = (threadStruct*)threadStructInput;
-    auto A=ts->A;
-    auto C=ts->C;
-
-
-    for (int i = ts->id; i < (*A).size(); i += ts->numberThreads){
-        for (int j = 0; j < (*A).size(); j++){
-            (*C)[j][i]=(*A)[i][j];
-        }
-    }
-
-    pthread_exit(NULL);
-}
-
-
+#include <omp.h>
 
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
@@ -58,10 +23,10 @@ std::vector<std::vector<int>> generateRandom2D(int n)
     return randomMatrix;
 }
 
-void print2D(std::vector<std::vector<int>> *matrixPtr)
+void print2D(std::vector<std::vector<int>> A)
 {
     printf("\n");
-    for (auto &value : (*matrixPtr))
+    for (auto &value : A)
     {
 
         for (auto &entry : value)
@@ -90,140 +55,107 @@ int main()
 
     // uncomment when finished testing
     // auto N = {128, 1024, 2048, 4096};
-    auto N = {16};
+    auto N = {4};
 
     for (auto n : N)
     {
         auto matrix = generateRandom2D(n);
-        auto matrixPtr = &matrix;
+        auto matrixPtr = std::make_shared<std::vector<std::vector<int>>>(matrix);
         printf("Initial Matrix \n");
-        print2D(matrixPtr);
+        print2D(matrix);
 
         //perform each of the operations and use print2D to print the output
         // I put the check dimension function above so we can just call it before doing anything else
+        // we might have to use pointers to move our matrices around since it asks for in place transposition and passing by value might cause memory issues
 
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
+            double begin, end, timeDiff;
 
-            //Block
-            pthread_t threads[THREAD_NUM];
+            printf("Naive Transpose without Threading \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double naiveNoTime = end-begin;
 
-            // setup threads
-            std::vector<threadStructBlock> structVecBlock;
-            for (int i = 0; i < 4; i++)
-            {
-                structVecBlock.push_back(threadStructBlock());
-                structVecBlock[i].matrixPtr = matrixPtr;
-                structVecBlock[i].numberThreads = THREAD_NUM;
-                structVecBlock[i].id = i;
-                structVecBlock[i].subBlockSize=n/2;
-                structVecBlock[i].startX=0;
-                structVecBlock[i].startY=0;
-            }
+            printf("Diagonal Transpose without Threading \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double diagNoTime = end-begin;
+
+            printf("Block Transpose without Threading \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double blockNoTime = end-begin;
 
 
-            for (int i=0;i<2;i++)//thread 0: 0 0; thread 1: 0 n/2
-            {
-                structVecBlock[i].startX=0;
-                structVecBlock[i].startY=i*n/2;
-            }
+            printf("Naive Transpose with PThreads \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double naivePTime = end-begin;
 
-            for (int i=2;i<4;i++)
-            {
-                structVecBlock[i].startX=n/2;
-                structVecBlock[i].startY=(i-2)*n/2;
-            }
-          
+            printf("Diagonal Transpose with PThreads \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double diagPTime = end-begin;
 
-            //First Transposition
-            for (int i = 0; i < THREAD_NUM; ++i)
-            {
-                pthread_create(&threads[i], NULL, elementBlockTransposeThread, &structVecBlock[i]);
-            }
-           
-            for (int j = 0; j < THREAD_NUM; ++j)
-                pthread_join(threads[j], NULL);
-
-            //matrix=*matrixPtr;
-           //allBlocksTranspose(matrixPtr,n);
+            printf("Block Transpose with PThreads \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double blockPTime = end-begin;
             
-            for (int i = 0; i < THREAD_NUM; ++i)
-            {
-                pthread_create(&threads[i], NULL,lastTranspose, &structVecBlock[i]);
-            }
+    
+            printf("Naive Transpose with OpenMP \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double naiveOTime = end-begin;
 
-            for (int j = 0; j < THREAD_NUM; ++j)
-                pthread_join(threads[j], NULL);
+            printf("Diagonal Transpose with OpenMP \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double diagOTime = end-begin;
 
-             printf("\nTransposed Matrix \n");
-            print2D(matrixPtr);
+            printf("Block Transpose with OpenMP \n");
+            begin = omp_get_wtime();
+            // call transpose
+            end = omp_get_wtime();
+            double blockOTime = end-begin;
 
+            // auto ompDiagTime = (end - begin);
+            // print2D(*matrixPtr);
+            // printf("Diagonal time: %d \n", ompDiagTime);
+            // printf("Block Transpose \n");
+            // int startX=0;
+            // int startY=0;
+            // elementBlockTranspose(matrixPtr,n, startX, startY);
+            // allBlocksTranspose(matrixPtr,n);
+            // matrix=*matrixPtr;
+            // print2D(matrix);
 
-            //DIAGONAL
-            // pthread_t threads[THREAD_NUM];
+            printf("\nNaive with no threading %f ms\n", naiveNoTime);
+            printf("Diagonal with no threading %f ms\n", diagNoTime);
+            printf("Block with no threading %f ms\n", blockNoTime);
 
-            // setup threads
-            std::vector<threadStruct> structVec;
-            for (int i = 0; i < 4; i++)
-            {
-                structVec.push_back(threadStruct());
-                structVec[i].matrixPtr = matrixPtr;
-                structVec[i].numberThreads = THREAD_NUM;
-                structVec[i].id = i;
-            }
+            printf("\nNaive with pthreads %f ms\n", naivePTime);
+            printf("Diagonal with pthreads %f ms\n", diagPTime);
+            printf("Block with pthreads %f ms\n", blockPTime);
 
-            // create threads and do diagonal transpose
-            for (int i = 0; i < THREAD_NUM; ++i)
-            {
-                pthread_create(&threads[i], NULL, diagTranspose, &structVec[i]);
-            }
-
-            // join all threads
-            for (int j = 0; j < THREAD_NUM; ++j)
-                pthread_join(threads[j], NULL);
-
-            printf("Diagonal Transpose \n");
-            print2D(matrixPtr);
+            printf("\nNaive with pthreads %f ms\n", naiveOTime);
+            printf("Diagonal with pthreads %f ms\n", diagOTime);
+            printf("Block with pthreads %f ms\n", blockOTime);
         }
         else
         {
             printf("Error: matrix needs to be square");
         }
     }
-
-
-    // Rashaad basic parallel transpose below
-    std::vector<threadStruct> structVec;
-    // threadStruct thread_struct;
-    auto A=generateRandom2D(8);
-    auto B=generateRandom2D(8);
-    auto C=generateRandom2D(8);
-
-    for (int i=0;i<4;i++){
-
-        structVec.push_back(threadStruct());
-        structVec[i].A=&A;
-        structVec[i].B=&B;
-        structVec[i].C=&C;
-
-    }
-
-
-
-     pthread_t thread[4];
-  // int tid[4];
-    for (int i = 0; i < 4; i++) {
-            structVec[i].id = i;
-            structVec[i].numberThreads=4;
-            pthread_create(&thread[i], NULL, transposeMatrix, &structVec[i]);
-    }
-   
-    for (int i = 0; i < 4; i++){
-        pthread_join(thread[i], NULL);
-    }
-
-    print2D(A);
-    print2D(C);
 
     return 0;
 }
