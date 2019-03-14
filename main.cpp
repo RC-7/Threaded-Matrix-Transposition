@@ -70,7 +70,7 @@ int main()
         if (checkDimension(matrix.size(), matrix[0].size()))
         {
             double begin, end, timeDiff;
-
+            printf("Transposition times for matrix of size %d \n", n);
             printf("Naive Transpose without Threading \n");
             begin = omp_get_wtime();
             // call transpose
@@ -79,7 +79,7 @@ int main()
 
             printf("Diagonal Transpose without Threading \n");
             begin = omp_get_wtime();
-            // call transpose
+            diagTranspose(matrixPtr);
             end = omp_get_wtime();
             double diagNoTime = end-begin;
 
@@ -94,6 +94,7 @@ int main()
 
 
             printf("Naive Transpose with PThreads \n");
+            pthread_t threads[THREAD_NUM];
             begin = omp_get_wtime();
             // call transpose
             end = omp_get_wtime();
@@ -101,13 +102,31 @@ int main()
 
             printf("Diagonal Transpose with PThreads \n");
             begin = omp_get_wtime();
-            // call transpose
+            
+             // setup threads
+            std::vector<threadStruct> structVec;
+            for (int i = 0; i < THREAD_NUM; i++)
+            {
+                structVec.push_back(threadStruct());
+                structVec[i].matrixPtr = matrixPtr;
+                structVec[i].numberThreads = THREAD_NUM;
+                structVec[i].id = i;
+            }
+
+            // create threads and do diagonal transpose
+            for (int i = 0; i < THREAD_NUM; ++i)
+            {
+                pthread_create(&threads[i], NULL, pthreadDiagTranspose, &structVec[i]);
+            }
+
+            // join all threads
+            for (int j = 0; j < THREAD_NUM; ++j)
+                pthread_join(threads[j], NULL);
+
             end = omp_get_wtime();
             double diagPTime = end-begin;
 
             printf("Block Transpose with PThreads \n");
-
-            pthread_t threads[THREAD_NUM];
 
             // setup threads
             std::vector<threadStructBlock> structVecBlock;
@@ -165,7 +184,7 @@ int main()
 
             printf("Diagonal Transpose with OpenMP \n");
             begin = omp_get_wtime();
-            // call transpose
+            ompDiagTranspose(matrixPtr);
             end = omp_get_wtime();
             double diagOTime = end-begin;
 
@@ -188,9 +207,9 @@ int main()
             printf("Diagonal with pthreads %f s\n", diagPTime);
             printf("Block with pthreads %f s\n", blockPTime);
 
-            printf("\nNaive with pthreads %f s\n", naiveOTime);
-            printf("Diagonal with pthreads %f s\n", diagOTime);
-            printf("Block with pthreads %f s\n", blockOTime);
+            printf("\nNaive with openMP %f s\n", naiveOTime);
+            printf("Diagonal with openMP %f s\n", diagOTime);
+            printf("Block with openMP %f s\n", blockOTime);
         }
         else
         {
