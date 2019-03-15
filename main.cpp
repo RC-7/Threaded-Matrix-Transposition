@@ -4,12 +4,13 @@
 #include <stdio.h>
 #include <memory>
 #include <omp.h>
+#include <fstream>
 #include <pthread.h>
 #include "diag.cpp"
 #include "block.cpp"
 #include "naive.cpp"
 
-#define THREAD_NUM 4
+// #define THREAD_NUM 4
 
 std::vector<std::vector<int>> generateRandom2D(int n)
 {
@@ -29,17 +30,17 @@ std::vector<std::vector<int>> generateRandom2D(int n)
 
 void print2D(std::vector<std::vector<int>> A)
 {
-    printf("\n");
+    //printf("\n");
     for (auto &value : A)
     {
 
         for (auto &entry : value)
         {
 
-            printf("%d  \t", entry);
+            //printf("%d  \t", entry);
         }
 
-        printf("\n");
+        //printf("\n");
     }
 }
 
@@ -53,17 +54,40 @@ bool checkDimension(int aLength, int aWidth)
     return false;
 }
 
-int main()
+int main(int argc,char *argv[])
 {
+
+    int THREAD_NUM;
+
+    if (argc >= 2)
+    {
+
+            // std::string x=*argv[1];
+            // printf("%s\n",x );     
+            // THREAD_NUM=(*argv[1])-'0';
+        THREAD_NUM=std::stoi(argv[1]);
+    }
     srand(time(NULL));
 
     auto N = {128, 1024, 2048, 4096};
+
+    std::ofstream outputFile;
+    outputFile.open ("results.txt",ios::app);
+
+
+    outputFile<<"Threads used: "<<THREAD_NUM<<"\n";
+
+    printf("value of threads is: %d\n",THREAD_NUM );
+
+    outputFile<<"Matrix size , Naive no thread, Diagonal no thread, Block no thread, Naive pthread, Diagonal pthread, Block pthread";
+
+    outputFile<< ", Naive openMP, Diagonal openMP, Block openMP \n";
 
     for (auto n : N)
     {
         auto matrix = generateRandom2D(n);
         auto matrixPtr = &matrix;
-        printf("Initial Matrix \n");
+        //printf("Initial Matrix \n");
         // print2D(matrix);
 
         if (checkDimension(matrix.size(), matrix[0].size()))
@@ -71,20 +95,25 @@ int main()
             auto outputMatrix = matrix;
 
             double begin, end, timeDiff;
-            printf("Transposition times for matrix of size %d \n", n);
-            printf("Naive Transpose without Threading \n");
+            //printf("Transposition times for matrix of size %d \n", n);
+            //printf("Naive Transpose without Threading \n");
+
+
+            outputFile<<n<<" , ";
+            // outputFile<<"Naive Transpose without Threading \n";
+
             begin = omp_get_wtime();
             naiveTranspose(matrixPtr, &outputMatrix);
             end = omp_get_wtime();
             double naiveNoTime = end-begin;
 
-            printf("Diagonal Transpose without Threading \n");
+            //printf("Diagonal Transpose without Threading \n");
             begin = omp_get_wtime();
             diagTranspose(matrixPtr);
             end = omp_get_wtime();
             double diagNoTime = end-begin;
 
-            printf("Block Transpose without Threading \n");
+            //printf("Block Transpose without Threading \n");
             begin = omp_get_wtime();
             int startX=0;
             int startY=0;
@@ -94,7 +123,7 @@ int main()
             double blockNoTime = end-begin;
 
 
-            printf("Naive Transpose with PThreads \n");
+            //printf("Naive Transpose with PThreads \n");
             pthread_t threads[THREAD_NUM];
             begin = omp_get_wtime();
 
@@ -122,7 +151,7 @@ int main()
             end = omp_get_wtime();
             double naivePTime = end-begin;
 
-            printf("Diagonal Transpose with PThreads \n");
+            //printf("Diagonal Transpose with PThreads \n");
             begin = omp_get_wtime();
             
              // setup threads
@@ -148,11 +177,11 @@ int main()
             end = omp_get_wtime();
             double diagPTime = end-begin;
 
-            printf("Block Transpose with PThreads \n");
+            //printf("Block Transpose with PThreads \n");
 
             // setup threads
             std::vector<threadStructBlock> structVecBlock;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < THREAD_NUM; i++)
             {
                 structVecBlock.push_back(threadStructBlock());
                 structVecBlock[i].matrixPtr = matrixPtr;
@@ -198,19 +227,19 @@ int main()
             double blockPTime = end-begin;
             
     
-            printf("Naive Transpose with OpenMP \n");
+            //printf("Naive Transpose with OpenMP \n");
             begin = omp_get_wtime();
             ompNaiveTranspose(matrixPtr, &outputMatrix);
             end = omp_get_wtime();
             double naiveOTime = end-begin;
 
-            printf("Diagonal Transpose with OpenMP \n");
+            //printf("Diagonal Transpose with OpenMP \n");
             begin = omp_get_wtime();
             ompDiagTranspose(matrixPtr);
             end = omp_get_wtime();
             double diagOTime = end-begin;
 
-            printf("Block Transpose with OpenMP \n");
+            // printf("Block Transpose with OpenMP \n");
             startX=0;
             startY=0;
             begin = omp_get_wtime();
@@ -220,24 +249,28 @@ int main()
             double blockOTime = end-begin;
 
 
-            
-            printf("\nNaive with no threading %f s\n", naiveNoTime);
-            printf("Diagonal with no threading %f s\n", diagNoTime);
-            printf("Block with no threading %f s\n", blockNoTime);
+            outputFile<<naiveNoTime<< ","<<diagNoTime<< ","<<blockNoTime<<",";
+            outputFile<<naivePTime<<","<<diagPTime<<","<<blockPTime<<",";
+            outputFile<<naiveOTime<<","<<diagOTime<<","<<blockOTime<<"\n";
+            //printf("\nNaive with no threading %f s\n", naiveNoTime);
+            //printf("Diagonal with no threading %f s\n", diagNoTime);
+            //printf("Block with no threading %f s\n", blockNoTime);
 
-            printf("\nNaive with pthreads %f s\n", naivePTime);
-            printf("Diagonal with pthreads %f s\n", diagPTime);
-            printf("Block with pthreads %f s\n", blockPTime);
+            //printf("\nNaive with pthreads %f s\n", naivePTime);
+            //printf("Diagonal with pthreads %f s\n", diagPTime);
+            //printf("Block with pthreads %f s\n", blockPTime);
 
-            printf("\nNaive with openMP %f s\n", naiveOTime);
-            printf("Diagonal with openMP %f s\n", diagOTime);
-            printf("Block with openMP %f s\n\n\n", blockOTime);
+            //printf("\nNaive with openMP %f s\n", naiveOTime);
+            //printf("Diagonal with openMP %f s\n", diagOTime);
+            //printf("Block with openMP %f s\n\n\n", blockOTime);
         }
         else
         {
-            printf("Error: matrix needs to be square");
+            //printf("Error: matrix needs to be square");
         }
     }
+
+    outputFile.close();
 
     return 0;
 }
