@@ -152,7 +152,7 @@ int main()
 
             // setup threads
             std::vector<threadStructBlock> structVecBlock;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < THREAD_NUM; i++)
             {
                 structVecBlock.push_back(threadStructBlock());
                 structVecBlock[i].matrixPtr = matrixPtr;
